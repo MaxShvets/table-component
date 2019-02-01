@@ -1,8 +1,32 @@
 <template>
     <div class="table-container">
+        <div class="filter-panel">
+            <label
+                v-for="(_, columnName) in filters"
+                :key="columnName"
+                :for="columnName + 'column'"
+            >
+                {{ columns[columnName] }} contains
+                <input :id="columnName + 'column'" v-model="filters[columnName]">
+                <button @click="removeFilter(columnName)">Remove</button>
+            </label>
+            <div class="add-filter" v-if="unfilteredColumns.length">
+                <button @click="addFilter">Add filter</button>
+                <label for="unfiltered-columns"> for </label>
+                <select id="unfiltered-columns" v-model="columnToFilter">
+                    <option
+                        v-for="columnName in unfilteredColumns"
+                        :key="columnName"
+                        :value="columnName"
+                    >
+                        {{ columns[columnName] }}
+                    </option>
+                </select>
+            </div>
+        </div>
         <table>
             <tr>
-                <th v-for="(titleText, columnName) in titles"
+                <th v-for="(titleText, columnName) in columns"
                     :key="columnName"
                     @click="resort(columnName)"
                     v-bind:class="{
@@ -13,46 +37,56 @@
                     {{ titleText }}
                 </th>
             </tr>
-            <tr v-for="item in displayedData" :key="item.name">
-                <td v-for="(_, propertyName) in titles" :key="propertyName">
+            <tr v-for="item in currentPageContent" :key="item.name">
+                <td v-for="(_, propertyName) in columns" :key="propertyName">
                     {{ item[propertyName] }}
                 </td>
             </tr>
         </table>
         <Pagination
-                :current-page="currentPage"
-                :total-pages="totalPages"
-                @page-select="changePage"
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            @page-select="changePage"
         ></Pagination>
     </div>
 </template>
 
 <script>
+    import Vue from 'vue';
     import Pagination from './Pagination';
 
     export default {
         name: 'Table',
         props: {
             itemsPerPage: Number,
-            titles: Object,
+            columns: Object,
             items: Array
         },
         data() {
             return {
                 currentPage: 1,
                 sortBy: '',
-                isSortAscending: true
+                isSortAscending: true,
+                filters: {},
+                columnToFilter: Object.keys(this.columns)[0]
             }
         },
         computed: {
-            displayedData() {
-                const {itemsPerPage, items, currentPage} = this;
+            displayedItems() {
+                const {items} = this;
                 return [...items]
-                    .sort(this.createComparator())
-                    .slice(itemsPerPage * (currentPage - 1), itemsPerPage * currentPage)
+                    .filter(this.filterItem.bind(this))
+                    .sort(this.createComparator());
+            },
+            currentPageContent() {
+                const {itemsPerPage, currentPage} = this;
+                return this.displayedItems.slice(itemsPerPage * (currentPage - 1), itemsPerPage * currentPage)
             },
             totalPages() {
-                return Math.ceil(this.items.length / this.itemsPerPage)
+                return Math.ceil(this.displayedItems.length / this.itemsPerPage)
+            },
+            unfilteredColumns() {
+                return Object.keys(this.columns).filter(column => !(column in this.filters))
             }
         },
         methods: {
@@ -86,6 +120,19 @@
                     this.sortBy = columnName;
                     this.isSortAscending = true;
                 }
+            },
+            filterItem(item) {
+                return !Object.keys(this.filters)
+                    .map(columnName => item[columnName].includes(this.filters[columnName]))
+                    .includes(false)
+            },
+            addFilter() {
+                Vue.set(this.filters, this.columnToFilter, '');
+                this.columnToFilter = this.unfilteredColumns[0];
+            },
+            removeFilter(columnName) {
+                Vue.delete(this.filters, columnName);
+
             }
         },
         components: {
@@ -95,8 +142,12 @@
 </script>
 
 <style scoped>
+    .add-filter {
+        display: inline-block;
+    }
+
     table {
-        margin: 0 auto;
+        width: 100%;
         border-collapse: collapse;
     }
 

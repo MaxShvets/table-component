@@ -14,7 +14,7 @@
             return {
                 tableData: {
                     itemsPerPage: 5,
-                    titles: {
+                    columns: {
                         name: "Name",
                         height: "Height",
                         mass: "Mass",
