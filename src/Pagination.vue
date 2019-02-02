@@ -46,7 +46,7 @@
         },
         methods: {
             handlePageClick(pageNum) {
-                pageNum !== this.currentPage && this.$emit("page-select", pageNum)
+                pageNum && pageNum !== this.currentPage && this.$emit("page-select", pageNum)
             }
         }
     }
