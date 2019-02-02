@@ -39,7 +39,7 @@
             </tr>
             <tr v-for="item in currentPageContent" :key="item.name">
                 <td v-for="(_, propertyName) in columns" :key="propertyName">
-                    {{ item[propertyName] }}
+                    <input v-model.lazy="item[propertyName]">
                 </td>
             </tr>
         </table>
