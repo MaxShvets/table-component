@@ -1,16 +1,16 @@
 <template>
     <div class="pagination" v-if="1 < totalPages">
-        <span
+        <button
             v-for="item in paginationItems"
             :key="item.id"
             @click="item.handleClick"
-            :class="{
-                'pagination-item': item.isClickable,
+            :class="['pagination-item', {
                 'current-page': item.isCurrentPage
-            }"
+            }]"
+            :disabled="!item.isClickable"
         >
             {{ item.text }}
-        </span>
+        </button>
     </div>
 </template>
 
@@ -52,22 +52,28 @@
     }
 </script>
 
-<style scoped>
-    span {
-        display: inline-block;
-        margin: auto 3px;
-    }
-
+<style lang="less" scoped>
     .pagination {
         text-align: center;
-    }
+        margin: 10px 0;
 
-    .pagination .pagination-item {
-        text-decoration: underline;
-        cursor: pointer;
+        &-item {
+            display: inline-block;
+            margin: 0 3px;
+            cursor: pointer;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        &-item[disabled] {
+            cursor: default;
+            border: none;
+            background: none;
+        }
     }
 
     .current-page {
         font-weight: bold;
+        background-color: #b0e2ff;
     }
 </style>
