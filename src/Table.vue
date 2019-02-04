@@ -4,11 +4,10 @@
             <label
                 v-for="(_, columnName) in filters"
                 :key="columnName"
-                :for="columnName + 'column'"
                 class="filter-block"
             >
-                {{ columns[columnName] }} contains
-                <input type="text" :id="columnName + 'column'" v-model="filters[columnName]">
+                {{ getColumnTitle(columnName) }} contains
+                <input type="text" v-model="filters[columnName]">
                 <button class="remove-filter" @click="removeFilter(columnName)">
                     &#x2715;
                 </button>
@@ -22,14 +21,14 @@
                         :key="columnName"
                         :value="columnName"
                     >
-                        {{ columns[columnName] }}
+                        {{ getColumnTitle(columnName) }}
                     </option>
                 </select>
             </div>
         </div>
         <table cellspacing="0">
             <tr>
-                <th v-for="(titleText, columnName) in columns"
+                <th v-for="(columnData, columnName) in columns"
                     :key="columnName"
                     @click="resort(columnName)"
                     v-bind:class="{
@@ -37,12 +36,23 @@
                         ascending: columnName === sortBy && isSortAscending
                     }"
                 >
-                    <span>{{ titleText }}</span>
+                    <span>{{ columnData.title || columnData }}</span>
                 </th>
             </tr>
-            <tr v-for="item in currentPageContent" :key="item.name">
-                <td v-for="(_, propertyName) in columns" :key="propertyName">
-                    <input v-model.lazy="item[propertyName]">
+            <tr v-for="row in currentPageContent" :key="row.num">
+                <td
+                    v-for="cell in row.cells"
+                    :key="cell.columnName"
+                    @click="setCurrentlyEditedCell(row.num, cell.columnName)"
+                >
+                    <input
+                        v-if="cell.value !== undefined || cell.isCurrentlyEdited"
+                        :type="cell.isNumeric ? 'number' : 'text'"
+                        @change="updateCellValue($event, row.num, cell)"
+                        :value="cell.value"
+                        v-focus="cell.isCurrentlyEdited"
+                    >
+                    <span v-else class="missing-value">unknown</span>
                 </td>
             </tr>
         </table>
@@ -61,9 +71,9 @@
     export default {
         name: 'Table',
         props: {
-            itemsPerPage: Number,
+            rowsPerPage: Number,
             columns: Object,
-            items: Array
+            rows: Array
         },
         data() {
             const firstColumn = Object.keys(this.columns)[0];
@@ -73,22 +83,36 @@
                 sortBy: firstColumn,
                 isSortAscending: true,
                 filters: {},
-                columnToFilter: firstColumn
+                columnToFilter: firstColumn,
+                currentlyEditedCell: {
+                    row: 0,
+                    column: firstColumn
+                }
             }
         },
         computed: {
-            displayedItems() {
-                const {items} = this;
-                return [...items]
-                    .filter(this.filterItem.bind(this))
-                    .sort(this.createComparator());
+            displayedRows() {
+                const {rows} = this;
+                return rows
+                    .map((item, i) => ({values: item, num: i}))
+                    .filter(this.filterRow.bind(this))
+                    .sort(this.createComparator())
+                    .map(row => ({
+                        cells: Object.keys(this.columns).map(columnName => ({
+                            columnName,
+                            value: row.values[columnName],
+                            isNumeric: this.columns[columnName].isNumeric,
+                            isCurrentlyEdited: this.isCurrentlyEditedCell(row.num, columnName)
+                        })),
+                        num: row.num
+                    }));
             },
             currentPageContent() {
-                const {itemsPerPage, currentPage} = this;
-                return this.displayedItems.slice(itemsPerPage * (currentPage - 1), itemsPerPage * currentPage)
+                const {rowsPerPage, currentPage} = this;
+                return this.displayedRows.slice(rowsPerPage * (currentPage - 1), rowsPerPage * currentPage)
             },
             totalPages() {
-                return Math.ceil(this.displayedItems.length / this.itemsPerPage)
+                return Math.ceil(this.displayedRows.length / this.rowsPerPage)
             },
             unfilteredColumns() {
                 return Object.keys(this.columns).filter(column => !(column in this.filters))
@@ -102,11 +126,13 @@
                 const {sortBy, isSortAscending} = this;
                 const multiplier = isSortAscending ? 1 : -1;
                 return sortBy
-                    ? (item, otherItem) => {
+                    ? (row, otherRow) => {
+                        const value = row.values[sortBy];
+                        const otherValue = otherRow.values[sortBy];
                         let result;
-                        if (otherItem[sortBy] < item[sortBy]) {
+                        if (otherValue < value) {
                             result = 1;
-                        } else if (item[sortBy] < otherItem[sortBy]) {
+                        } else if (value < otherValue) {
                             result = -1;
                         } else {
                             result = 0;
@@ -126,9 +152,12 @@
                     this.isSortAscending = true;
                 }
             },
-            filterItem(item) {
+            filterRow({values}) {
                 return !Object.keys(this.filters)
-                    .map(columnName => item[columnName].includes(this.filters[columnName]))
+                    .map(columnName => (
+                        values.hasOwnProperty(columnName)
+                        && values[columnName].toString().includes(this.filters[columnName]
+                    )))
                     .includes(false)
             },
             addFilter() {
@@ -138,10 +167,38 @@
             removeFilter(columnName) {
                 Vue.delete(this.filters, columnName);
 
+            },
+            setCurrentlyEditedCell(row, column) {
+                this.currentlyEditedCell = {row, column};
+            },
+            isCurrentlyEditedCell(row, column) {
+                const {row: currentRow, column: currentColumn} = this.currentlyEditedCell;
+                return row === currentRow && column === currentColumn;
+            },
+            updateCellValue(event, rowNum, cell) {
+                const columnName = cell.columnName;
+                const {[columnName]: _, ...updatedCell} = this.rows[rowNum];
+                const newValue = event.target.value;
+                if (newValue !== "") {
+                    updatedCell[columnName] = cell.isNumeric ? parseFloat(newValue) : newValue;
+                }
+                const updatedRows = [...this.rows];
+                updatedRows[rowNum] = updatedCell;
+                this.$emit('input', updatedRows);
+            },
+            getColumnTitle(columnName) {
+                return this.columns[columnName].title || this.columns[columnName];
             }
         },
         components: {
             Pagination
+        },
+        directives: {
+            focus: {
+                inserted(el, binding) {
+                    binding.value && el.focus();
+                }
+            }
         }
     }
 </script>
@@ -234,11 +291,18 @@
         cursor: pointer;
     }
 
+    td input, .missing-value {
+        padding: 0 0 0 2px;
+    }
+
     td input {
         width: 100%;
         border: none;
         box-sizing: border-box;
-        padding: 0 0 0 2px;
+    }
+
+    .missing-value {
+        font-size: 11px;
     }
 
     .sorted-column {

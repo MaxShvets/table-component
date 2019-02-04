@@ -1,5 +1,5 @@
 <template>
-    <Table v-bind="tableData"></Table>
+    <Table v-bind="tableData" v-model="tableData.rows"></Table>
 </template>
 
 <script>
@@ -13,21 +13,27 @@
         data() {
             return {
                 tableData: {
-                    itemsPerPage: 5,
+                    rowsPerPage: 5,
                     columns: {
                         name: "Name",
-                        height: "Height",
-                        mass: "Mass",
+                        height: {
+                            title: "Height",
+                            isNumeric: true
+                        },
+                        mass: {
+                            title: "Mass",
+                            isNumeric: true
+                        },
                         hair_color: "Hair color",
                         skin_color: "Skin color",
                         eye_color: "Eye color",
                         birth_year: "Birth year",
                         gender: "Gender"
                     },
-                    items: [{
+                    rows: [{
                         name: "Luke Skywalker",
-                        height: "172",
-                        mass: "77",
+                        height: 172,
+                        mass: 77,
                         hair_color: "blond",
                         skin_color: "fair",
                         eye_color: "blue",
@@ -35,8 +41,8 @@
                         gender: "male",
                     }, {
                         name: "C-3PO",
-                        height: "167",
-                        mass: "75",
+                        height: 167,
+                        mass: 75,
                         hair_color: "n/a",
                         skin_color: "gold",
                         eye_color: "yellow",
@@ -44,8 +50,8 @@
                         gender: "n/a",
                     }, {
                         name: "R2-D2",
-                        height: "96",
-                        mass: "32",
+                        height: 96,
+                        mass: 32,
                         hair_color: "n/a",
                         skin_color: "white, blue",
                         eye_color: "red",
@@ -53,8 +59,8 @@
                         gender: "n/a",
                     }, {
                         name: "Darth Vader",
-                        height: "202",
-                        mass: "136",
+                        height: 202,
+                        mass: 136,
                         hair_color: "none",
                         skin_color: "white",
                         eye_color: "yellow",
@@ -62,8 +68,8 @@
                         gender: "male",
                     }, {
                         name: "Leia Organa",
-                        height: "150",
-                        mass: "49",
+                        height: 150,
+                        mass: 49,
                         hair_color: "brown",
                         skin_color: "light",
                         eye_color: "brown",
@@ -71,8 +77,8 @@
                         gender: "female",
                     }, {
                         name: "Owen Lars",
-                        height: "178",
-                        mass: "120",
+                        height: 178,
+                        mass: 120,
                         hair_color: "brown, grey",
                         skin_color: "light",
                         eye_color: "blue",
@@ -80,8 +86,8 @@
                         gender: "male",
                     }, {
                         name: "Beru Whitesun lars",
-                        height: "165",
-                        mass: "75",
+                        height: 165,
+                        mass: 75,
                         hair_color: "brown",
                         skin_color: "light",
                         eye_color: "blue",
@@ -89,8 +95,8 @@
                         gender: "female",
                     }, {
                         name: "R5-D4",
-                        height: "97",
-                        mass: "32",
+                        height: 97,
+                        mass: 32,
                         hair_color: "n/a",
                         skin_color: "white, red",
                         eye_color: "red",
@@ -98,8 +104,8 @@
                         gender: "n/a",
                     }, {
                         name: "Biggs Darklighter",
-                        height: "183",
-                        mass: "84",
+                        height: 183,
+                        mass: 84,
                         hair_color: "black",
                         skin_color: "light",
                         eye_color: "brown",
@@ -107,8 +113,8 @@
                         gender: "male",
                     }, {
                         name: "Obi-Wan Kenobi",
-                        height: "182",
-                        mass: "77",
+                        height: 182,
+                        mass: 77,
                         hair_color: "auburn, white",
                         skin_color: "fair",
                         eye_color: "blue-gray",
@@ -116,8 +122,8 @@
                         gender: "male",
                     }, {
                         name: "Anakin Skywalker",
-                        height: "188",
-                        mass: "84",
+                        height: 188,
+                        mass: 84,
                         hair_color: "blond",
                         skin_color: "fair",
                         eye_color: "blue",
@@ -125,8 +131,7 @@
                         gender: "male",
                     }, {
                         name: "Wilhuff Tarkin",
-                        height: "180",
-                        mass: "unknown",
+                        height: 180,
                         hair_color: "auburn, grey",
                         skin_color: "fair",
                         eye_color: "blue",
@@ -134,8 +139,8 @@
                         gender: "male",
                     }, {
                         name: "Chewbacca",
-                        height: "228",
-                        mass: "112",
+                        height: 228,
+                        mass: 112,
                         hair_color: "brown",
                         skin_color: "unknown",
                         eye_color: "blue",
@@ -143,8 +148,8 @@
                         gender: "male",
                     }, {
                         name: "Han Solo",
-                        height: "180",
-                        mass: "80",
+                        height: 180,
+                        mass: 80,
                         hair_color: "brown",
                         skin_color: "fair",
                         eye_color: "brown",
@@ -152,8 +157,8 @@
                         gender: "male",
                     }, {
                         name: "Greedo",
-                        height: "173",
-                        mass: "74",
+                        height: 173,
+                        mass: 74,
                         hair_color: "n/a",
                         skin_color: "green",
                         eye_color: "black",
@@ -161,8 +166,8 @@
                         gender: "male",
                     }, {
                         name: "Jabba Desilijic Tiure",
-                        height: "175",
-                        mass: "1358",
+                        height: 175,
+                        mass: 1358,
                         hair_color: "n/a",
                         skin_color: "green-tan, brown",
                         eye_color: "orange",
@@ -170,8 +175,8 @@
                         gender: "hermaphrodite",
                     }, {
                         name: "Wedge Antilles",
-                        height: "170",
-                        mass: "77",
+                        height: 170,
+                        mass: 77,
                         hair_color: "brown",
                         skin_color: "fair",
                         eye_color: "hazel",
@@ -179,8 +184,8 @@
                         gender: "male",
                     }, {
                         name: "Jek Tono Porkins",
-                        height: "180",
-                        mass: "110",
+                        height: 180,
+                        mass: 110,
                         hair_color: "brown",
                         skin_color: "fair",
                         eye_color: "blue",
@@ -188,8 +193,8 @@
                         gender: "male",
                     }, {
                         name: "Yoda",
-                        height: "66",
-                        mass: "17",
+                        height: 66,
+                        mass: 17,
                         hair_color: "white",
                         skin_color: "green",
                         eye_color: "brown",
@@ -197,8 +202,8 @@
                         gender: "male",
                     }, {
                         name: "Palpatine",
-                        height: "170",
-                        mass: "75",
+                        height: 170,
+                        mass: 75,
                         hair_color: "grey",
                         skin_color: "pale",
                         eye_color: "yellow",
@@ -206,8 +211,8 @@
                         gender: "male",
                     }, {
                         name: "Boba Fett",
-                        height: "183",
-                        mass: "78.2",
+                        height: 183,
+                        mass: 78.2,
                         hair_color: "black",
                         skin_color: "fair",
                         eye_color: "brown",
@@ -215,8 +220,8 @@
                         gender: "male",
                     }, {
                         name: "IG-88",
-                        height: "200",
-                        mass: "140",
+                        height: 200,
+                        mass: 140,
                         hair_color: "none",
                         skin_color: "metal",
                         eye_color: "red",
@@ -224,8 +229,8 @@
                         gender: "none",
                     }, {
                         name: "Bossk",
-                        height: "190",
-                        mass: "113",
+                        height: 190,
+                        mass: 113,
                         hair_color: "none",
                         skin_color: "green",
                         eye_color: "red",
@@ -233,8 +238,8 @@
                         gender: "male",
                     }, {
                         name: "Lando Calrissian",
-                        height: "177",
-                        mass: "79",
+                        height: 177,
+                        mass: 79,
                         hair_color: "black",
                         skin_color: "dark",
                         eye_color: "brown",
@@ -242,8 +247,8 @@
                         gender: "male",
                     }, {
                         name: "Lobot",
-                        height: "175",
-                        mass: "79",
+                        height: 175,
+                        mass: 79,
                         hair_color: "none",
                         skin_color: "light",
                         eye_color: "blue",
@@ -251,8 +256,8 @@
                         gender: "male",
                     }, {
                         name: "Ackbar",
-                        height: "180",
-                        mass: "83",
+                        height: 180,
+                        mass: 83,
                         hair_color: "none",
                         skin_color: "brown mottle",
                         eye_color: "orange",
@@ -260,8 +265,7 @@
                         gender: "male",
                     }, {
                         name: "Mon Mothma",
-                        height: "150",
-                        mass: "unknown",
+                        height: 150,
                         hair_color: "auburn",
                         skin_color: "fair",
                         eye_color: "blue",
@@ -269,8 +273,6 @@
                         gender: "female",
                     }, {
                         name: "Arvel Crynyd",
-                        height: "unknown",
-                        mass: "unknown",
                         hair_color: "brown",
                         skin_color: "fair",
                         eye_color: "brown",
@@ -278,8 +280,8 @@
                         gender: "male",
                     }, {
                         name: "Wicket Systri Warrick",
-                        height: "88",
-                        mass: "20",
+                        height: 88,
+                        mass: 20,
                         hair_color: "brown",
                         skin_color: "brown",
                         eye_color: "brown",
@@ -287,8 +289,8 @@
                         gender: "male",
                     }, {
                         name: "Nien Nunb",
-                        height: "160",
-                        mass: "68",
+                        height: 160,
+                        mass: 68,
                         hair_color: "none",
                         skin_color: "grey",
                         eye_color: "black",
