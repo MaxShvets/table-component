@@ -26,7 +26,7 @@
                 </select>
             </div>
         </div>
-        <table cellspacing="0">
+        <table v-if="currentPageContent.length" cellspacing="0">
             <tr>
                 <th v-for="(columnData, columnName) in columns"
                     :key="columnName"
@@ -56,6 +56,9 @@
                 </td>
             </tr>
         </table>
+        <div v-else class="no-rows-message">
+            {{ noDataMessage }}
+        </div>
         <Pagination
             :current-page="currentPage"
             :total-pages="totalPages"
@@ -116,6 +119,11 @@
             },
             unfilteredColumns() {
                 return Object.keys(this.columns).filter(column => !(column in this.filters))
+            },
+            noDataMessage() {
+                return this.rows.length
+                    ? "There is no data matching the filters"
+                    : "There is no data to display";
             }
         },
         methods: {
