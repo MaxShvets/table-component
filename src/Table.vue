@@ -49,6 +49,7 @@
                         v-if="cell.value !== undefined || cell.isCurrentlyEdited"
                         :type="cell.isNumeric ? 'number' : 'text'"
                         @change="updateCellValue($event, row.num, cell)"
+                        @focusout=""
                         :value="cell.value"
                         v-focus="cell.isCurrentlyEdited"
                     >
@@ -87,10 +88,7 @@
                 isSortAscending: true,
                 filters: {},
                 columnToFilter: firstColumn,
-                currentlyEditedCell: {
-                    row: 0,
-                    column: firstColumn
-                }
+                currentlyEditedCell: null
             }
         },
         computed: {
@@ -179,7 +177,14 @@
             setCurrentlyEditedCell(row, column) {
                 this.currentlyEditedCell = {row, column};
             },
+            unsetCurrentlyEditedCell() {
+                this.currentlyEditedCell = null;
+            },
             isCurrentlyEditedCell(row, column) {
+                if (!this.currentlyEditedCell) {
+                    return false;
+                }
+
                 const {row: currentRow, column: currentColumn} = this.currentlyEditedCell;
                 return row === currentRow && column === currentColumn;
             },
