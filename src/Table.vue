@@ -132,11 +132,16 @@
                 const {sortBy, isSortAscending} = this;
                 const multiplier = isSortAscending ? 1 : -1;
                 return sortBy
-                    ? (row, otherRow) => {
-                        const value = row.values[sortBy];
-                        const otherValue = otherRow.values[sortBy];
+                    ? ({values}, {values: otherValues}) => {
+                        const value = values[sortBy];
+                        const otherValue = otherValues[sortBy];
                         let result;
-                        if (otherValue < value) {
+
+                        if (value === undefined && otherValue !== undefined) {
+                            result = 1;
+                        } else if (otherValue === undefined && value !== undefined) {
+                            result = -1;
+                        } else if (otherValue < value) {
                             result = 1;
                         } else if (value < otherValue) {
                             result = -1;
