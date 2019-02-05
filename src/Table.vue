@@ -12,6 +12,7 @@
                     &#x2715;
                 </button>
             </label>
+
             <div class="filter-block add-filter-block" v-if="unfilteredColumns.length">
                 <button @click="addFilter">Add filter</button>
                 <label for="unfiltered-columns"> for </label>
@@ -26,40 +27,34 @@
                 </select>
             </div>
         </div>
+
         <table v-if="currentPageContent.length" cellspacing="0">
             <tr>
-                <th v-for="(columnData, columnName) in columns"
+                <ColumnHeading
+                    v-for="(columnData, columnName) in columns"
                     :key="columnName"
+                    :sorted="columnName === sortBy"
+                    :ascending="columnName === sortBy && isSortAscending"
+                    :title="columnData.title || columnData"
                     @click="resort(columnName)"
-                    v-bind:class="{
-                        'sorted-column': columnName === sortBy,
-                        ascending: columnName === sortBy && isSortAscending
-                    }"
-                >
-                    <span>{{ columnData.title || columnData }}</span>
-                </th>
+                ></ColumnHeading>
             </tr>
+
             <tr v-for="row in currentPageContent" :key="row.num">
-                <td
+                <TableCell
                     v-for="cell in row.cells"
                     :key="cell.columnName"
+                    v-bind="cell"
                     @click="setCurrentlyEditedCell(row.num, cell.columnName)"
-                >
-                    <input
-                        v-if="cell.value !== undefined || cell.isCurrentlyEdited"
-                        :type="cell.isNumeric ? 'number' : 'text'"
-                        @change="updateCellValue($event, row.num, cell)"
-                        @focusout=""
-                        :value="cell.value"
-                        v-focus="cell.isCurrentlyEdited"
-                    >
-                    <span v-else class="missing-value">unknown</span>
-                </td>
+                    @change="updateCellValue($event, row.num, cell.columnName)"
+                    @focusout="unsetCurrentlyEditedCell"
+                ></TableCell>
             </tr>
         </table>
         <div v-else class="no-rows-message">
             {{ noDataMessage }}
         </div>
+
         <Pagination
             :current-page="currentPage"
             :total-pages="totalPages"
@@ -70,7 +65,9 @@
 
 <script>
     import Vue from 'vue';
-    import Pagination from './Pagination';
+    import Pagination from './components/Pagination';
+    import ColumnHeading from './components/ColumnHeading';
+    import TableCell from './components/TableCell';
 
     export default {
         name: 'Table',
@@ -102,7 +99,7 @@
                         cells: Object.keys(this.columns).map(columnName => ({
                             columnName,
                             value: row.values[columnName],
-                            isNumeric: this.columns[columnName].isNumeric,
+                            isValueNumeric: this.columns[columnName].isNumeric,
                             isCurrentlyEdited: this.isCurrentlyEditedCell(row.num, columnName)
                         })),
                         num: row.num
@@ -193,30 +190,27 @@
                 const {row: currentRow, column: currentColumn} = this.currentlyEditedCell;
                 return row === currentRow && column === currentColumn;
             },
-            updateCellValue(event, rowNum, cell) {
-                const columnName = cell.columnName;
+            updateCellValue(event, rowNum, columnName) {
                 const {[columnName]: _, ...updatedCell} = this.rows[rowNum];
                 const newValue = event.target.value;
                 if (newValue !== "") {
-                    updatedCell[columnName] = cell.isNumeric ? parseFloat(newValue) : newValue;
+                    updatedCell[columnName] = this.isNumericCell(columnName) ? parseFloat(newValue) : newValue;
                 }
                 const updatedRows = [...this.rows];
                 updatedRows[rowNum] = updatedCell;
                 this.$emit('input', updatedRows);
+            },
+            isNumericCell(columnName) {
+                return this.columns[columnName].isNumeric
             },
             getColumnTitle(columnName) {
                 return this.columns[columnName].title || this.columns[columnName];
             }
         },
         components: {
-            Pagination
-        },
-        directives: {
-            focus: {
-                inserted(el, binding) {
-                    binding.value && el.focus();
-                }
-            }
+            Pagination,
+            ColumnHeading,
+            TableCell
         }
     }
 </script>
@@ -278,12 +272,12 @@
         overflow: hidden;
     }
 
-    tr, td, th {
-        padding: 0;
+    tr {
+        height: 25px;
     }
 
-    tr, td input {
-        height: 25px;
+    tr, td, th {
+        padding: 0;
     }
 
     td, th {
@@ -299,53 +293,6 @@
 
         &:last-child td {
             border-bottom: 0;
-        }
-    }
-
-    th {
-        background-color: #b0e2ff;
-        font-weight: 500;
-        font-size: 14px;
-        cursor: pointer;
-    }
-
-    td input, .missing-value {
-        padding: 0 0 0 2px;
-    }
-
-    td input {
-        width: 100%;
-        border: none;
-        box-sizing: border-box;
-    }
-
-    .missing-value {
-        font-size: 11px;
-    }
-
-    .sorted-column {
-        @arrow-side-length: 5px;
-
-        span {
-            position: relative;
-        }
-
-        span:after {
-            content: "";
-            position: absolute;
-            width: @arrow-side-length;
-            height: @arrow-side-length;
-            transform: rotate(135deg);
-            top: 5px;
-            right: -10px;
-            border-style: solid;
-            border-color: #000;
-            border-width: 1px 1px 0 0;
-        }
-
-        &.ascending span:after {
-            transform: rotate(-45deg);
-            top: 7px;
         }
     }
 </style>
