@@ -58,6 +58,7 @@
     import TableCell from './components/TableCell';
     import ColumnFilter from './components/ColumnFilter';
     import AddFilterBlock from './components/AddFilterBlock';
+    import {basicComparator} from "./helpers/basic-comparator";
 
     export default {
         name: 'Table',
@@ -118,21 +119,7 @@
                     ? ({values}, {values: otherValues}) => {
                         const value = values[sortBy];
                         const otherValue = otherValues[sortBy];
-                        let result;
-
-                        if (value === undefined && otherValue !== undefined) {
-                            result = 1;
-                        } else if (otherValue === undefined && value !== undefined) {
-                            result = -1;
-                        } else if (otherValue < value) {
-                            result = 1;
-                        } else if (value < otherValue) {
-                            result = -1;
-                        } else {
-                            result = 0;
-                        }
-
-                        return multiplier * result;
+                        return multiplier * basicComparator(value, otherValue);
                     }
                     : () => 0
             },
@@ -159,7 +146,6 @@
             },
             removeFilter(columnName) {
                 Vue.delete(this.filters, columnName);
-
             },
             setCurrentlyEditedCell(row, column) {
                 this.currentlyEditedCell = {row, column};

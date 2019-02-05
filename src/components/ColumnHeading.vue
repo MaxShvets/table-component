@@ -1,7 +1,7 @@
 <template>
     <th
         @click="$emit('click')"
-        v-bind:class="{'sorted-column': sorted, ascending: ascending}"
+        v-bind:class="{'sorted-column': sorted, ascending}"
     >
         <span>{{ title }}</span>
     </th>
