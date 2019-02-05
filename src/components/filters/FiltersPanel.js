@@ -1,4 +1,4 @@
-import AddFilterBlock from '../AddFilterBlock';
+import AddFilterBlock from './AddFilterBlock';
 
 export default {
     name: 'FiltersPanel',

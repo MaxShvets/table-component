@@ -29,7 +29,7 @@
 </template>
 
 <script>
-    import {getFiltersForColumnType, createFilter} from './filters'
+    import {getFiltersForColumnType, createFilter} from './index'
 
     export default {
         name: "AddFilterBlock",
@@ -83,4 +83,4 @@
     }
 </script>
 
-<style lang="less" src="../styles/filter-panel.less"></style>
+<style lang="less" src="../../styles/filter-panel.less"></style>
