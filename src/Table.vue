@@ -1,31 +1,19 @@
 <template>
     <div class="table-container">
         <div class="filter-panel">
-            <label
+            <ColumnFilter
                 v-for="(_, columnName) in filters"
                 :key="columnName"
-                class="filter-block"
-            >
-                {{ getColumnTitle(columnName) }} contains
-                <input type="text" v-model="filters[columnName]">
-                <button class="remove-filter" @click="removeFilter(columnName)">
-                    &#x2715;
-                </button>
-            </label>
+                :filteredColumnTitle="getColumnTitle(columnName)"
+                @remove-filter="removeFilter(columnName)"
+                v-model="filters[columnName]"
+            ></ColumnFilter>
 
-            <div class="filter-block add-filter-block" v-if="unfilteredColumns.length">
-                <button @click="addFilter">Add filter</button>
-                <label for="unfiltered-columns"> for </label>
-                <select id="unfiltered-columns" v-model="columnToFilter">
-                    <option
-                        v-for="columnName in unfilteredColumns"
-                        :key="columnName"
-                        :value="columnName"
-                    >
-                        {{ getColumnTitle(columnName) }}
-                    </option>
-                </select>
-            </div>
+            <AddFilterBlock
+                :columns="columns"
+                :filters="filters"
+                @filter-added="addFilter"
+            ></AddFilterBlock>
         </div>
 
         <table v-if="currentPageContent.length" cellspacing="0">
@@ -68,6 +56,8 @@
     import Pagination from './components/Pagination';
     import ColumnHeading from './components/ColumnHeading';
     import TableCell from './components/TableCell';
+    import ColumnFilter from './components/ColumnFilter';
+    import AddFilterBlock from './components/AddFilterBlock';
 
     export default {
         name: 'Table',
@@ -84,7 +74,6 @@
                 sortBy: firstColumn,
                 isSortAscending: true,
                 filters: {},
-                columnToFilter: firstColumn,
                 currentlyEditedCell: null
             }
         },
@@ -111,9 +100,6 @@
             },
             totalPages() {
                 return Math.ceil(this.displayedRows.length / this.rowsPerPage)
-            },
-            unfilteredColumns() {
-                return Object.keys(this.columns).filter(column => !(column in this.filters))
             },
             noDataMessage() {
                 return this.rows.length
@@ -168,9 +154,8 @@
                     )))
                     .includes(false)
             },
-            addFilter() {
-                Vue.set(this.filters, this.columnToFilter, '');
-                this.columnToFilter = this.unfilteredColumns[0];
+            addFilter(filteredColumn) {
+                Vue.set(this.filters, filteredColumn, '');
             },
             removeFilter(columnName) {
                 Vue.delete(this.filters, columnName);
@@ -210,7 +195,9 @@
         components: {
             Pagination,
             ColumnHeading,
-            TableCell
+            TableCell,
+            ColumnFilter,
+            AddFilterBlock
         }
     }
 </script>
@@ -218,51 +205,6 @@
 <style lang="less" scoped>
     .table-container {
         font-family: Arial, sans-serif;
-    }
-
-    .filter-block {
-        border: 1px solid;
-        border-radius: 5px;
-        display: inline-block;
-        padding: 5px;
-        margin: 5px 10px 5px 0;
-
-        &, input[type="text"] {
-            font-size: 15px;
-        }
-
-        input[type="text"] {
-            border: none;
-            border-bottom: 1px solid;
-            outline: none;
-            margin-right: 3px;
-        }
-    }
-
-    .add-filter-block {
-        border: none;
-        padding-left: 0;
-
-        button, select {
-            font-size: 15px;
-        }
-
-        button {
-            background: none;
-            border-radius: 5px;
-            border: 1px solid #000;
-            outline: none;
-        }
-    }
-
-    .remove-filter {
-        @button-side-length: 20px;
-        position: relative;
-        width: @button-side-length;
-        height: @button-side-length;
-        border-radius: 100%;
-        border: 1px solid #000;
-        padding: 0 0 1px 0;
     }
 
     table {
