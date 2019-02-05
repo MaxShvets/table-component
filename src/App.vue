@@ -18,11 +18,11 @@
                         name: "Name",
                         height: {
                             title: "Height",
-                            isNumeric: true
+                            type: "number"
                         },
                         mass: {
                             title: "Mass",
-                            isNumeric: true
+                            type: "number"
                         },
                         hair_color: "Hair color",
                         skin_color: "Skin color",
@@ -100,7 +100,6 @@
                         hair_color: "n/a",
                         skin_color: "white, red",
                         eye_color: "red",
-                        birth_year: "unknown",
                         gender: "n/a",
                     }, {
                         name: "Biggs Darklighter",
@@ -142,7 +141,6 @@
                         height: 228,
                         mass: 112,
                         hair_color: "brown",
-                        skin_color: "unknown",
                         eye_color: "blue",
                         birth_year: "200BBY",
                         gender: "male",
@@ -189,7 +187,6 @@
                         hair_color: "brown",
                         skin_color: "fair",
                         eye_color: "blue",
-                        birth_year: "unknown",
                         gender: "male",
                     }, {
                         name: "Yoda",
@@ -276,7 +273,6 @@
                         hair_color: "brown",
                         skin_color: "fair",
                         eye_color: "brown",
-                        birth_year: "unknown",
                         gender: "male",
                     }, {
                         name: "Wicket Systri Warrick",
@@ -294,7 +290,6 @@
                         hair_color: "none",
                         skin_color: "grey",
                         eye_color: "black",
-                        birth_year: "unknown",
                         gender: "male",
                     }]
                 }

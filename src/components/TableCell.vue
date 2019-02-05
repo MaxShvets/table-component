@@ -2,7 +2,7 @@
     <td @click="$emit('click')">
         <input
             v-if="value !== undefined || isCurrentlyEdited"
-            :type="isValueNumeric ? 'number' : 'text'"
+            :type="valueType"
             :value="value"
             @change="$emit('change', $event)"
             @focusout="$emit('focusout')"
@@ -17,7 +17,10 @@
         name: "TableCell",
         props: {
             value: [Number, String],
-            isValueNumeric: Boolean,
+            valueType: {
+                type: String,
+                default: "text"
+            },
             isCurrentlyEdited: Boolean
         },
         directives: {

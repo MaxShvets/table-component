@@ -1,20 +1,10 @@
 <template>
     <div class="table-container">
-        <div class="filter-panel">
-            <ColumnFilter
-                v-for="(_, columnName) in filters"
-                :key="columnName"
-                :filteredColumnTitle="getColumnTitle(columnName)"
-                @remove-filter="removeFilter(columnName)"
-                v-model="filters[columnName]"
-            ></ColumnFilter>
-
-            <AddFilterBlock
-                :columns="columns"
-                :filters="filters"
-                @filter-added="addFilter"
-            ></AddFilterBlock>
-        </div>
+        <FilterPanel
+            :columns="columns"
+            :filters="filters"
+            v-model="filters"
+        ></FilterPanel>
 
         <table v-if="currentPageContent.length" cellspacing="0">
             <tr>
@@ -52,19 +42,27 @@
 </template>
 
 <script>
-    import Vue from 'vue';
     import Pagination from './components/Pagination';
     import ColumnHeading from './components/ColumnHeading';
     import TableCell from './components/TableCell';
-    import ColumnFilter from './components/ColumnFilter';
-    import AddFilterBlock from './components/AddFilterBlock';
+    import FilterPanel from './components/filters/FiltersPanel';
     import {basicComparator} from "./helpers/basic-comparator";
+    import {columnTypes, validateInputType} from "./column-types";
+    import {applyFiltersToRow} from "./components/filters";
 
     export default {
         name: 'Table',
         props: {
             rowsPerPage: Number,
-            columns: Object,
+            columns: {
+                type: Object,
+                validator(columns) {
+                    return Object.keys(columns).map(columnName => {
+                        const columnType = columns[columnName].type;
+                        !columnType || validateInputType(columnType)
+                    });
+                }
+            },
             rows: Array
         },
         data() {
@@ -83,13 +81,13 @@
                 const {rows} = this;
                 return rows
                     .map((item, i) => ({values: item, num: i}))
-                    .filter(this.filterRow.bind(this))
+                    .filter(({values}) => applyFiltersToRow(values, this.filters))
                     .sort(this.createComparator())
                     .map(row => ({
                         cells: Object.keys(this.columns).map(columnName => ({
                             columnName,
                             value: row.values[columnName],
-                            isValueNumeric: this.columns[columnName].isNumeric,
+                            valueType: this.columns[columnName].type,
                             isCurrentlyEdited: this.isCurrentlyEditedCell(row.num, columnName)
                         })),
                         num: row.num
@@ -133,20 +131,6 @@
                     this.isSortAscending = true;
                 }
             },
-            filterRow({values}) {
-                return !Object.keys(this.filters)
-                    .map(columnName => (
-                        values.hasOwnProperty(columnName)
-                        && values[columnName].toString().includes(this.filters[columnName]
-                    )))
-                    .includes(false)
-            },
-            addFilter(filteredColumn) {
-                Vue.set(this.filters, filteredColumn, '');
-            },
-            removeFilter(columnName) {
-                Vue.delete(this.filters, columnName);
-            },
             setCurrentlyEditedCell(row, column) {
                 this.currentlyEditedCell = {row, column};
             },
@@ -162,17 +146,19 @@
                 return row === currentRow && column === currentColumn;
             },
             updateCellValue(event, rowNum, columnName) {
-                const {[columnName]: _, ...updatedCell} = this.rows[rowNum];
+                const updatedRow = this.rows[rowNum];
                 const newValue = event.target.value;
                 if (newValue !== "") {
-                    updatedCell[columnName] = this.isNumericCell(columnName) ? parseFloat(newValue) : newValue;
+                    updatedRow[columnName] = this.isNumericCell(columnName) ? parseFloat(newValue) : newValue;
+                } else {
+                    delete updatedRow[columnName];
                 }
                 const updatedRows = [...this.rows];
-                updatedRows[rowNum] = updatedCell;
+                updatedRows[rowNum] = updatedRow;
                 this.$emit('input', updatedRows);
             },
             isNumericCell(columnName) {
-                return this.columns[columnName].isNumeric
+                return this.columns[columnName].type === columnTypes.number;
             },
             getColumnTitle(columnName) {
                 return this.columns[columnName].title || this.columns[columnName];
@@ -182,8 +168,7 @@
             Pagination,
             ColumnHeading,
             TableCell,
-            ColumnFilter,
-            AddFilterBlock
+            FilterPanel
         }
     }
 </script>
