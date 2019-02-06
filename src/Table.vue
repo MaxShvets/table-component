@@ -42,13 +42,13 @@
 </template>
 
 <script>
-    import Pagination from './components/Pagination';
-    import ColumnHeading from './components/ColumnHeading';
-    import TableCell from './components/TableCell';
-    import FilterPanel from './components/filters/FiltersPanel';
+    import Pagination from "./components/Pagination";
+    import ColumnHeading from "./components/ColumnHeading";
+    import TableCell from "./components/TableCell";
+    import FilterPanel from "./components/filters/FiltersPanel";
     import {basicComparator} from "./helpers/basic-comparator";
     import {columnTypes, validateInputType} from "./column-types";
-    import {applyFiltersToRow} from "./components/filters";
+    import createFilterCollection from "./components/filters/FilterCollection"
 
     export default {
         name: 'Table',
@@ -72,7 +72,7 @@
                 currentPage: 1,
                 sortBy: firstColumn,
                 isSortAscending: true,
-                filters: {},
+                filters: createFilterCollection(this.columns),
                 currentlyEditedCell: null
             }
         },
@@ -81,7 +81,7 @@
                 const {rows} = this;
                 return rows
                     .map((item, i) => ({values: item, num: i}))
-                    .filter(({values}) => applyFiltersToRow(values, this.filters))
+                    .filter(({values}) => this.filters.apply(values))
                     .sort(this.createComparator())
                     .map(row => ({
                         cells: Object.keys(this.columns).map(columnName => ({

@@ -49,20 +49,14 @@
         computed: {
             unfilteredColumns() {
                 return Object.keys(this.columns).filter(
-                    columnName => this.getAvailableFiltersForColumn(columnName).length
+                    columnName => this.filters.getAvailableFiltersForColumn(columnName).length
                 );
             },
             availableFilterTypes() {
-                return this.getAvailableFiltersForColumn(this.selectedColumn)
+                return this.filters.getAvailableFiltersForColumn(this.selectedColumn)
             }
         },
         methods: {
-            getAvailableFiltersForColumn(column) {
-                const columnType = this.columns[column].type || "text";
-                const availableFilters = getFiltersForColumnType(columnType);
-                const currentFilters = this.filters[column] || {};
-                return availableFilters.filter(filterType => !(filterType in currentFilters));
-            },
             addFilter() {
                 const newFilter = createFilter(this.selectedFilterType);
                 this.$emit("filter-added", this.selectedColumn, this.selectedFilterType, newFilter);

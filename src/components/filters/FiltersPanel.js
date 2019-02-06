@@ -5,16 +5,14 @@ export default {
     render() {
         return (
             <div className="filter-panel">
-                {Object.entries(this.filters).map(([columnName, columnFilters]) => (
-                    Object.entries(columnFilters).map(([filterType, filter]) => (
-                        <filter.component
-                            key={`${columnName}-${filterType}-filter`}
-                            {...{props: filter.data}}
-                            columnTitle={this.getColumnTitle(columnName)}
-                            on-remove-filter={() => this.removeFilter(columnName, filterType)}
-                            on-input={newData => this.updateFilter(columnName, filterType, newData)}
-                        />
-                    ))
+                {this.filters.map((columnName, filterType, filter) => (
+                    <filter.component
+                        key={`${columnName}-${filterType}-filter`}
+                        {...{props: filter.data}}
+                        columnTitle={this.getColumnTitle(columnName)}
+                        on-remove-filter={() => this.removeFilter(columnName, filterType)}
+                        on-input={newData => this.updateFilter(columnName, filterType, newData)}
+                    />
                 ))}
 
                 <AddFilterBlock
@@ -40,25 +38,16 @@ export default {
             const columnData = this.columns[columnName];
             return columnData.title || columnData;
         },
-        addFilter(filteredColumn, filterType, filter) {
-            const newFiltersForColumn = Object.assign({}, this.filters[filteredColumn]);
-            newFiltersForColumn[filterType] = filter;
-            this.$emit('input', {...this.filters, [filteredColumn]: newFiltersForColumn})
+        addFilter(columnName, filterType, filter) {
+            this.$emit('input', this.filters.setFilter(columnName, filterType, filter));
         },
         removeFilter(columnName, filterType) {
-            const {...updatedFilters} = this.filters;
-            delete updatedFilters[columnName][filterType];
-            if (Object.keys(updatedFilters[columnName]).length === 0) {
-                delete updatedFilters[columnName];
-            }
-            this.$emit('input', updatedFilters)
+            this.$emit('input', this.filters.removeFilter(columnName, filterType));
         },
         updateFilter(columnName, filterType, newData) {
-            const {...updatedFilters} = this.filters;
-            const {...filter} = updatedFilters[columnName][filterType];
+            const filter = this.filters.getFilter(columnName, filterType);
             filter.data = newData;
-            updatedFilters[columnName][filterType] = filter;
-            this.$emit('input', updatedFilters);
+            this.$emit('input', this.filters.setFilter(columnName, filterType, filter));
         }
     }
 }
