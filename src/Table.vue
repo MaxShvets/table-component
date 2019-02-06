@@ -1,7 +1,7 @@
 <template>
     <div class="table-container">
         <FilterPanel
-            :columns="normalizedColumns"
+            :columns="columns"
             :filters="filters"
             v-model="filters"
         ></FilterPanel>
@@ -9,11 +9,11 @@
         <table v-if="currentPageContent.length" cellspacing="0">
             <tr>
                 <ColumnHeading
-                    v-for="(columnData, columnName) in normalizedColumns"
+                    v-for="(columnData, columnName) in columns"
                     :key="columnName"
                     :sorted="columnName === sortBy"
                     :ascending="columnName === sortBy && isSortAscending"
-                    :title="columnData.title"
+                    :title="columnData.title || columnData"
                     @click="resort(columnName)"
                 ></ColumnHeading>
             </tr>
@@ -77,17 +77,6 @@
             }
         },
         computed: {
-            normalizedColumns() {
-                return Object.entries(this.columns).reduce((columns, [columnName, columnData]) => {
-                    columns[columnName] = typeof columnData === "string"
-                        ? {
-                            title: columnData,
-                            type: "text"
-                        }
-                        : columnData;
-                    return columns;
-                }, {})
-            },
             displayedRows() {
                 const {rows} = this;
                 return rows
@@ -95,10 +84,10 @@
                     .filter(({values}) => this.filters.apply(values))
                     .sort(this.createComparator())
                     .map(row => ({
-                        cells: Object.keys(this.normalizedColumns).map(columnName => ({
+                        cells: Object.keys(this.columns).map(columnName => ({
                             columnName,
                             value: row.values[columnName],
-                            valueType: this.normalizedColumns[columnName].type,
+                            valueType: this.columns[columnName].type,
                             isCurrentlyEdited: this.isCurrentlyEditedCell(row.num, columnName)
                         })),
                         num: row.num
@@ -169,7 +158,10 @@
                 this.$emit('input', updatedRows);
             },
             isNumericCell(columnName) {
-                return this.normalizedColumns[columnName].type === columnTypes.number;
+                return this.columns[columnName].type === columnTypes.number;
+            },
+            getColumnTitle(columnName) {
+                return this.columns[columnName].title || this.columns[columnName];
             }
         },
         components: {
