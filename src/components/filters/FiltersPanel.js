@@ -36,7 +36,7 @@ export default {
     methods: {
         getColumnTitle(columnName) {
             const columnData = this.columns[columnName];
-            return columnData.title || columnData;
+            return columnData.title;
         },
         addFilter(columnName, filterType, filter) {
             this.$emit('input', this.filters.setFilter(columnName, filterType, filter));
