@@ -9,7 +9,7 @@ export default {
                     <filter.component
                         key={`${columnName}-${filterType}-filter`}
                         {...{props: filter.data}}
-                        columnTitle={this.getColumnTitle(columnName)}
+                        columnTitle={this.columns[columnName].title}
                         on-remove-filter={() => this.removeFilter(columnName, filterType)}
                         on-input={newData => this.updateFilter(columnName, filterType, newData)}
                     />
@@ -34,10 +34,6 @@ export default {
         }
     },
     methods: {
-        getColumnTitle(columnName) {
-            const columnData = this.columns[columnName];
-            return columnData.title || columnData;
-        },
         addFilter(columnName, filterType, filter) {
             this.$emit('input', this.filters.setFilter(columnName, filterType, filter));
         },

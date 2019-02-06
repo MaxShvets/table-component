@@ -60,7 +60,7 @@ export default function createFilterCollection(columns, predefinedFilters) {
     };
 
     self.getAvailableFiltersForColumn = function(column) {
-        const availableFilters = getFiltersForColumnType(columns[column].type || "text");
+        const availableFilters = getFiltersForColumnType(columns[column].type);
         const currentFilters = filters[column] || {};
         return availableFilters.filter(filterType => !(filterType in currentFilters));
     };

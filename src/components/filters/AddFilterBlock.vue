@@ -9,7 +9,7 @@
                     :key="columnName"
                     :value="columnName"
                 >
-                    {{ columns[columnName].title || columns[columnName] }}
+                    {{ columns[columnName].title }}
                 </option>
             </select>
         </label>
@@ -35,7 +35,7 @@
         name: "AddFilterBlock",
         data() {
             const selectedColumn = Object.keys(this.columns)[0];
-            const availableFilters = getFiltersForColumnType(this.columns[selectedColumn].type || "text");
+            const availableFilters = getFiltersForColumnType(this.columns[selectedColumn].type);
 
             return {
                 selectedColumn,

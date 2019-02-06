@@ -1,7 +1,7 @@
 <template>
     <div class="table-container">
         <FilterPanel
-            :columns="columns"
+            :columns="normalizedColumns"
             :filters="filters"
             v-model="filters"
         ></FilterPanel>
@@ -9,11 +9,11 @@
         <table v-if="currentPageContent.length" cellspacing="0">
             <tr>
                 <ColumnHeading
-                    v-for="(columnData, columnName) in columns"
+                    v-for="(columnData, columnName) in normalizedColumns"
                     :key="columnName"
                     :sorted="columnName === sortBy"
                     :ascending="columnName === sortBy && isSortAscending"
-                    :title="columnData.title || columnData"
+                    :title="columnData.title"
                     @click="resort(columnName)"
                 ></ColumnHeading>
             </tr>
@@ -42,12 +42,13 @@
 </template>
 
 <script>
+    import Vue from "vue";
     import Pagination from "./components/Pagination";
     import ColumnHeading from "./components/ColumnHeading";
     import TableCell from "./components/TableCell";
     import FilterPanel from "./components/filters/FiltersPanel";
     import {basicComparator} from "./helpers/basic-comparator";
-    import {columnTypes, validateInputType} from "./column-types";
+    import {columnTypes, validateInputType, normalizeColumns} from "./column-types";
     import createFilterCollection from "./components/filters/FilterCollection"
 
     export default {
@@ -67,12 +68,14 @@
         },
         data() {
             const firstColumn = Object.keys(this.columns)[0];
+            const normalizedColumns = normalizeColumns(this.columns);
 
             return {
                 currentPage: 1,
                 sortBy: firstColumn,
                 isSortAscending: true,
-                filters: createFilterCollection(this.columns),
+                normalizedColumns,
+                filters: createFilterCollection(normalizedColumns),
                 currentlyEditedCell: null
             }
         },
@@ -84,7 +87,7 @@
                     .filter(({values}) => this.filters.apply(values))
                     .sort(this.createComparator())
                     .map(row => ({
-                        cells: Object.keys(this.columns).map(columnName => ({
+                        cells: Object.keys(this.normalizedColumns).map(columnName => ({
                             columnName,
                             value: row.values[columnName],
                             valueType: this.columns[columnName].type,
@@ -159,9 +162,6 @@
             },
             isNumericCell(columnName) {
                 return this.columns[columnName].type === columnTypes.number;
-            },
-            getColumnTitle(columnName) {
-                return this.columns[columnName].title || this.columns[columnName];
             }
         },
         components: {
@@ -169,6 +169,15 @@
             ColumnHeading,
             TableCell,
             FilterPanel
+        },
+        watch: {
+            columns: {
+                handler: function(newColumns) {
+                    Vue.set(this, "normalizedColumns", normalizeColumns(newColumns));
+                    Vue.set(this, "filters", createFilterCollection(this.normalizedColumns));
+                },
+                deep: true
+            }
         }
     }
 </script>
